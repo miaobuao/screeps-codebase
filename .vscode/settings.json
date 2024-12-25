@@ -1,0 +1,17 @@
+{
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.sortImports": "explicit",
+		"source.organizeImports": "explicit"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"cSpell.words": [
+		"upgrader",
+		"upgraders"
+	]
+}

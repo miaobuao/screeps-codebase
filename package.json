@@ -1,0 +1,20 @@
+{
+	"name": "screeps",
+	"type": "module",
+	"scripts": {
+		"dev": "bun build ./src/index.ts --watch --format=cjs --target=node --outfile=dist/index.js",
+		"build": "bun build ./src/index.ts --minify --format=cjs --target=node --outfile=dist/index.js"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"prettier": "^3.4.2"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@types/lodash-es": "^4.17.12",
+		"@types/screeps": "^3.3.8",
+		"lodash-es": "^4.17.21"
+	}
+}
