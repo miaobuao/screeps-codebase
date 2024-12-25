@@ -20,10 +20,21 @@ export default function runUpgrader(creep: Creep) {
 			})
 		}
 	} else {
-		const target = creep.room.controller.pos.findClosestByRange(FIND_SOURCES)
-		if (target) {
-			if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-				creep.moveTo(target, { visualizePathStyle: { stroke: '#ffaa00' } })
+		const ruin = creep.room.controller.pos.findClosestByPath(FIND_RUINS, {
+			filter: (source) => source.store.energy > 0,
+		})
+		if (ruin) {
+			if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+				creep.moveTo(ruin, { visualizePathStyle: { stroke: '#ffaa00' } })
+			}
+		} else {
+			const source = creep.room.controller.pos.findClosestByPath(FIND_SOURCES, {
+				filter: (source) => source.energy > 0,
+			})
+			if (source) {
+				if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+					creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } })
+				}
 			}
 		}
 	}

@@ -34,6 +34,8 @@ export function loop() {
 		console.log('No upgraders')
 	}
 
+	const creepsIds = Object.keys(Game.creeps)
+
 	if (Game.spawns[SPAWN_NAME].spawning) {
 		const spawningCreep = Game.creeps[Game.spawns[SPAWN_NAME].spawning.name]
 		Game.spawns[SPAWN_NAME].room.visual.text(
@@ -42,22 +44,20 @@ export function loop() {
 			Game.spawns[SPAWN_NAME].pos.y,
 			{ align: 'left', opacity: 0.8 },
 		)
-	} else {
+	} else if (creepsIds.length < 5) {
 		// Spawn new creeps
 		const extensions = Game.spawns[SPAWN_NAME].room.find(FIND_STRUCTURES, {
 			filter: (s) => s.structureType == STRUCTURE_EXTENSION,
 		})
 		const body =
-			extensions.length > 2
-				? [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE]
-				: extensions.length > 1
-					? [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
-					: extensions.length > 0
-						? [WORK, WORK, CARRY, CARRY, MOVE]
-						: [WORK, CARRY, MOVE]
+			extensions.length > 4
+				? [WORK, WORK, CARRY, CARRY, MOVE]
+				: extensions.length > 2
+					? [WORK, CARRY, CARRY, MOVE]
+					: [WORK, CARRY, MOVE]
 		const hasSite =
 			Game.spawns[SPAWN_NAME].room.find(FIND_CONSTRUCTION_SITES).length > 0
-		if (isNil(upgraders) || upgraders.length < (hasSite ? 1 : 2)) {
+		if (isNil(upgraders) || upgraders.length < 2) {
 			const newName = 'Upgrader-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
 				memory: {
@@ -65,7 +65,7 @@ export function loop() {
 				},
 			})
 		}
-		if (isNil(harvesters) || harvesters.length < (hasSite ? 1 : 2)) {
+		if (isNil(harvesters) || harvesters.length < 2) {
 			const newName = 'Harvester-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
 				memory: {
@@ -73,7 +73,7 @@ export function loop() {
 				},
 			})
 		}
-		if (isNil(builders) || builders.length < (hasSite ? 1 : 0)) {
+		if (isNil(builders) || builders.length < (hasSite ? 2 : 0)) {
 			const newName = 'Builder-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
 				memory: {
