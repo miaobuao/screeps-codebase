@@ -6,13 +6,13 @@ export interface TransferComponentData extends BaseComponentData {
 }
 
 export default class TransferComponent extends BaseComponent {
+	static id = 'transfer' as const
+
 	constructor(
 		public structure: StructureSpawn | StructureExtension | null = null,
 	) {
 		super()
 	}
-
-	static id = 'transfer' as const
 
 	static import(data?: TransferComponentData): TransferComponent {
 		if (!data?.structureId) {

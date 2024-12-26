@@ -6,11 +6,11 @@ export interface UpgradeComponentData extends BaseComponentData {
 }
 
 export default class UpgradeComponent extends BaseComponent {
+	static id = 'upgrade' as const
+
 	constructor(public controller: StructureController | null = null) {
 		super()
 	}
-
-	static id = 'upgrade' as const
 
 	static import(data?: UpgradeComponentData) {
 		if (!data?.controllerId) {

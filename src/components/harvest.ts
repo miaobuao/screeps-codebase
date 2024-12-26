@@ -6,11 +6,11 @@ export interface HarvestComponentData extends BaseComponentData {
 }
 
 export default class HarvestComponent extends BaseComponent {
+	static id = 'harvest' as const
+
 	constructor(public source: Source | null = null) {
 		super()
 	}
-
-	static id = 'harvest' as const
 
 	static import(data?: HarvestComponentData): HarvestComponent {
 		if (!data?.sourceId) {

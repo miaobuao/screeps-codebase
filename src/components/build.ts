@@ -6,11 +6,11 @@ export interface BuildComponentData extends BaseComponentData {
 }
 
 export default class BuildComponent extends BaseComponent {
+	static id = 'build' as const
+
 	constructor(public constructionSite: ConstructionSite | null = null) {
 		super()
 	}
-
-	static id = 'build' as const
 
 	static import(data?: BuildComponentData) {
 		if (!data?.constructionSiteId) {

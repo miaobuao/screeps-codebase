@@ -132,7 +132,8 @@ export default class Sp1System extends BaseSystem {
 		if (totalEnergy < 300) {
 			return
 		}
-		const harvesterCount = this.getEntities([HarvestComponent]).length
+		const harvesters = this.getEntities([HarvestComponent])
+		const harvesterCount = harvesters.length
 		if (totalEnergy < 400) {
 			var body = [WORK, CARRY, MOVE]
 		} else if (totalEnergy < 500) {
@@ -159,7 +160,7 @@ export default class Sp1System extends BaseSystem {
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.getEntities([UpgradeComponent]).length < 3) {
+		} else if (this.getEntities([UpgradeComponent]).length < 10) {
 			const name = 'upgrader-' + Game.time
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
