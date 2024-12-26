@@ -35,6 +35,11 @@ export function loop() {
 	}
 
 	const creepsIds = Object.keys(Game.creeps)
+	const hasSite =
+		Game.spawns[SPAWN_NAME].room.find(FIND_CONSTRUCTION_SITES).length > 0
+	if (!hasSite && builders) {
+		map(builders, (c) => (c.memory.role = Role.upgrader))
+	}
 
 	if (Game.spawns[SPAWN_NAME].spawning) {
 		const spawningCreep = Game.creeps[Game.spawns[SPAWN_NAME].spawning.name]
@@ -55,8 +60,6 @@ export function loop() {
 				: extensions.length > 2
 					? [WORK, CARRY, CARRY, MOVE]
 					: [WORK, CARRY, MOVE]
-		const hasSite =
-			Game.spawns[SPAWN_NAME].room.find(FIND_CONSTRUCTION_SITES).length > 0
 		if (isNil(upgraders) || upgraders.length < 2) {
 			const newName = 'Upgrader-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {

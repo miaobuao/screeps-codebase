@@ -9,10 +9,17 @@ export default function runBuilder(creep: Creep) {
 	}
 
 	if (creep.memory.building) {
-		const target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
-		if (target) {
-			if (creep.build(target!) == ERR_NOT_IN_RANGE) {
-				creep.moveTo(target!, { visualizePathStyle: { stroke: '#ffffff' } })
+		const resource = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES)
+		if (resource) {
+			if (creep.pickup(resource) == ERR_NOT_IN_RANGE) {
+				creep.moveTo(resource, { visualizePathStyle: { stroke: '#ffffff' } })
+			}
+		} else {
+			const target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
+			if (target) {
+				if (creep.build(target!) == ERR_NOT_IN_RANGE) {
+					creep.moveTo(target!, { visualizePathStyle: { stroke: '#ffffff' } })
+				}
 			}
 		}
 	} else {
