@@ -29,6 +29,9 @@ export function loop() {
 	} = groupBy(Game.creeps, (creep) => creep.memory.role)
 	if (!harvesters || !Object.keys(harvesters).length) {
 		console.log('No harvesters')
+		var noHarvester = true
+	} else {
+		noHarvester = false
 	}
 	if (!upgraders || !Object.keys(upgraders).length) {
 		console.log('No upgraders')
@@ -60,23 +63,21 @@ export function loop() {
 				: extensions.length > 2
 					? [WORK, CARRY, CARRY, MOVE]
 					: [WORK, CARRY, MOVE]
-		if (isNil(upgraders) || upgraders.length < 2) {
-			const newName = 'Upgrader-' + Game.time
-			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
-				memory: {
-					role: Role.upgrader,
-				},
-			})
-		}
-		if (isNil(harvesters) || harvesters.length < 2) {
+		if (isNil(harvesters) || harvesters.length < 1) {
 			const newName = 'Harvester-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
 				memory: {
 					role: Role.harvester,
 				},
 			})
-		}
-		if (isNil(builders) || builders.length < (hasSite ? 2 : 0)) {
+		} else if (isNil(upgraders) || upgraders.length < 2) {
+			const newName = 'Upgrader-' + Game.time
+			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
+				memory: {
+					role: Role.upgrader,
+				},
+			})
+		} else if (isNil(builders) || builders.length < (hasSite ? 2 : 0)) {
 			const newName = 'Builder-' + Game.time
 			Game.spawns[SPAWN_NAME].spawnCreep(body, newName, {
 				memory: {

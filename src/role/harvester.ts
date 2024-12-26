@@ -1,5 +1,3 @@
-import { Role, SPAWN_NAME } from '../consts'
-
 export default function runHarvester(creep: Creep) {
 	if (creep.store.getFreeCapacity() > 0) {
 		const resource = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES)
@@ -40,14 +38,15 @@ export default function runHarvester(creep: Creep) {
 			if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } })
 			}
-		} else {
-			const hasSite =
-				Game.spawns[SPAWN_NAME].room.find(FIND_CONSTRUCTION_SITES).length > 0
-			if (hasSite) {
-				creep.memory.role = Role.builder
-			} else {
-				creep.memory.role = Role.upgrader
-			}
 		}
+		// else {
+		// 	const hasSite =
+		// 		Game.spawns[SPAWN_NAME].room.find(FIND_CONSTRUCTION_SITES).length > 0
+		// 	if (hasSite) {
+		// 		creep.memory.role = Role.builder
+		// 	} else {
+		// 		creep.memory.role = Role.upgrader
+		// 	}
+		// }
 	}
 }
