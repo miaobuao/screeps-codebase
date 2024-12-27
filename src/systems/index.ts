@@ -1,14 +1,15 @@
 import { map } from 'lodash-es'
+import type BaseComponent from '../components/base'
 import BuildComponent from '../components/build'
 import HarvestComponent from '../components/harvest'
 import TransferComponent from '../components/transfer'
 import UpgradeComponent from '../components/upgrade'
-import type BaseEntity from '../entities/base'
+import BaseEntity from '../entities/base'
 import BuilderEntity from '../entities/builder'
 import { HarvesterEntity } from '../entities/harvester'
 import UpgraderEntity from '../entities/upgrader'
 import statsScanner from '../utils/stats-scanner'
-import BaseSystem, { BehaviorType, type EntityData } from './base'
+import { BehaviorType, type EntityData } from './behavior-tree'
 
 declare global {
 	interface CreepMemory {
@@ -16,31 +17,44 @@ declare global {
 	}
 }
 
-const entitiesData: Record<string, EntityData> = {}
+const entitiesData: Record<string, BaseEntity<any> | undefined> = {}
 
-export default class System extends BaseSystem {
+export default class System {
+	public entities: BaseEntity<any>[] = []
+	public componentMap: Map<typeof BaseComponent, Set<BaseEntity>> = new Map()
+
 	constructor(private spawn: StructureSpawn) {
-		super()
-		const spawningName = map(
-			Game.spawns,
-			(spawn) => spawn.spawning?.name,
-		).filter(Boolean)
-		for (const name in Memory.creeps) {
-			if (!Game.creeps[name] && !spawningName.includes(name)) {
-				delete Memory.creeps[name]
-				delete entitiesData[name]
+		this.initializeEntities()
+	}
+
+	clearState() {
+		this.entities = []
+		this.componentMap.clear()
+	}
+
+	initializeEntities() {
+		if (Game.time % 10 === 0) {
+			const spawningName = map(
+				Game.spawns,
+				(spawn) => spawn.spawning?.name,
+			).filter(Boolean)
+			for (const name in Memory.creeps) {
+				if (!Game.creeps[name] && !spawningName.includes(name)) {
+					delete Memory.creeps[name]
+					delete entitiesData[name]
+				}
 			}
-		}
-		for (const name in entitiesData) {
-			if (!Game.creeps[name] && !spawningName.includes(name)) {
-				delete entitiesData[name]
+			for (const name in entitiesData) {
+				if (!Game.creeps[name] && !spawningName.includes(name)) {
+					delete entitiesData[name]
+				}
 			}
 		}
 		for (const name in Game.creeps) {
-			if (entitiesData[name]) {
-				const entity = this.parseEntityData(entitiesData[name])
-				this.entities.push(entity)
-			} else if (Game.creeps[name].room === this.spawn.room) {
+			let entity = entitiesData[name]
+			if (entity) {
+				this.registerEntity(entity)
+			} else {
 				this.createAndRegisterEntity(name)
 			}
 		}
@@ -74,10 +88,6 @@ export default class System extends BaseSystem {
 			this.spawnCreep()
 		}
 
-		this.exportAllEntities().map((entity) => {
-			entitiesData[entity.name] = entity
-		})
-
 		if (Game.time % 20 === 0) {
 			statsScanner()
 			if (!Memory.stats) {
@@ -110,6 +120,44 @@ export default class System extends BaseSystem {
 		}
 	}
 
+	getEntities<T extends typeof BaseComponent>(components: T[]) {
+		let intersection = this.componentMap.get(components[0])
+		if (!intersection) {
+			return []
+		}
+		for (let i = 1; i < components.length; i++) {
+			const set = this.componentMap.get(components[i])
+			if (set) {
+				intersection = intersection.intersection(set)
+			} else {
+				return []
+			}
+			if (!intersection.size) {
+				return []
+			}
+		}
+		return Array.from(intersection) as BaseEntity<InstanceType<T>>[]
+	}
+
+	parseEntityData(data: EntityData) {
+		const creep = Game.creeps[data.name]
+		const components = data.components
+			.map((component) => {
+				switch (component.componentId) {
+					case HarvestComponent.id:
+						return HarvestComponent.import(component)
+					case BuildComponent.id:
+						return BuildComponent.import(component)
+					case TransferComponent.id:
+						return TransferComponent.import(component)
+					case UpgradeComponent.id:
+						return UpgradeComponent.import(component)
+				}
+			})
+			.filter(Boolean)
+		return new BaseEntity(creep.name, components)
+	}
+
 	createAndRegisterEntity(name: string) {
 		let entity: BaseEntity<any> | null = null
 
@@ -126,11 +174,14 @@ export default class System extends BaseSystem {
 		}
 	}
 
-	registerEntity(entity: BaseEntity<any>): void {
+	registerEntity(entity: BaseEntity): void {
 		this.entities.push(entity)
-		entitiesData[entity.creep.name] = {
-			name: entity.creep.name,
-			components: entity.components,
+		entitiesData[entity.creep.name] = entity
+		for (const component of entity.components) {
+			const key = component.constructor as typeof BaseComponent
+			const set = this.componentMap.get(key) || new Set()
+			set.add(entity)
+			this.componentMap.set(key, set)
 		}
 	}
 
@@ -182,17 +233,17 @@ export default class System extends BaseSystem {
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (harvesterCount < 3) {
+		} else if (harvesterCount < 4) {
 			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.getEntities([UpgradeComponent]).length < 10) {
+		} else if (this.getEntities([UpgradeComponent]).length < 20) {
 			const name = this.getNewCreepName('upgrader')
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.hasSite && this.getEntities([BuildComponent]).length < 2) {
+		} else if (this.hasSite && this.getEntities([BuildComponent]).length < 1) {
 			const name = this.getNewCreepName('builder')
 			this.spawn.spawnCreep(body, name)
 			const entity = new BuilderEntity(name, {})
@@ -244,7 +295,7 @@ export default class System extends BaseSystem {
 						(structure.structureType == STRUCTURE_EXTENSION ||
 							structure.structureType == STRUCTURE_SPAWN) &&
 						structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
-				})
+				}) as StructureExtension | StructureSpawn | null
 				transferComponent.structure = target
 			}
 			if (
