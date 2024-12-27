@@ -1,4 +1,4 @@
-import { filter, reduce } from 'lodash-es'
+import { filter, map, reduce } from 'lodash-es'
 import BuildComponent from '../components/build'
 import HarvestComponent from '../components/harvest'
 import TransferComponent from '../components/transfer'
@@ -20,10 +20,18 @@ const entitiesData: Record<string, EntityData> = {}
 export default class Sp1System extends BaseSystem {
 	constructor(private spawn: StructureSpawn) {
 		super()
-		const spawningName = spawn.spawning?.name
+		const spawningName = map(
+			Game.spawns,
+			(spawn) => spawn.spawning?.name,
+		).filter(Boolean)
 		for (const name in Memory.creeps) {
-			if (!Game.creeps[name] && name !== spawningName) {
+			if (!Game.creeps[name] && !spawningName.includes(name)) {
 				delete Memory.creeps[name]
+				delete entitiesData[name]
+			}
+		}
+		for (const name in entitiesData) {
+			if (!Game.creeps[name] && !spawningName.includes(name)) {
 				delete entitiesData[name]
 			}
 		}
@@ -49,11 +57,6 @@ export default class Sp1System extends BaseSystem {
 				}
 			}
 		}
-		// for (const name in entitiesData) {
-		// 	const entityData = entitiesData[name]
-		// 	const entity = this.parseEntityData(entityData)
-		// 	this.entities.push(entity)
-		// }
 	}
 
 	registerEntity(entity: BaseEntity<any>): void {
