@@ -154,26 +154,35 @@ export default class Sp1System extends BaseSystem {
 		}
 		const hasHarvester = harvesterCount > 0
 		if (!hasHarvester) {
-			const name = 'harvester-' + Game.time
+			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
 		} else if (harvesterCount < 2) {
-			const name = 'harvester-' + Game.time
+			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
 		} else if (this.getEntities([UpgradeComponent]).length < 10) {
-			const name = 'upgrader-' + Game.time
+			const name = this.getNewCreepName('upgrader')
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
 			this.registerEntity(entity)
 		} else if (this.hasSite && this.getEntities([BuildComponent]).length < 1) {
-			const name = 'builder-' + Game.time
+			const name = this.getNewCreepName('builder')
 			this.spawn.spawnCreep(body, name)
 			const entity = new BuilderEntity(name, {})
 			this.registerEntity(entity)
 		}
+	}
+
+	getNewCreepName(prefix: string) {
+		const name = `${prefix}:${this.spawn.name}:${Game.time}`
+		let idx = 0
+		while (Memory.creeps[`${name}-${idx}`]) {
+			++idx
+		}
+		return `${name}-${idx}`
 	}
 
 	get hasSite() {
