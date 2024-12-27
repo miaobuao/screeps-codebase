@@ -2,28 +2,38 @@ import BaseComponent, { type BaseComponentData } from './base'
 
 export interface UpgradeComponentData extends BaseComponentData {
 	componentId: typeof UpgradeComponent.id
-	controllerId?: Id<StructureController>
+	controllerId: Id<StructureController> | null
 }
 
 export default class UpgradeComponent extends BaseComponent {
 	static id = 'upgrade' as const
 
-	constructor(public controller: StructureController | null = null) {
+	constructor(public controllerId: Id<StructureController> | null = null) {
 		super()
 	}
 
-	static import(data?: UpgradeComponentData) {
-		if (!data?.controllerId) {
-			return new UpgradeComponent()
+	get controller() {
+		if (this.controllerId) {
+			return Game.getObjectById(this.controllerId)
 		}
-		const obj = Game.getObjectById(data.controllerId)
-		return new UpgradeComponent(obj)
+		return null
+	}
+
+	set controller(controller) {
+		this.controllerId = controller?.id || null
+	}
+
+	static import({ controllerId }: UpgradeComponentData) {
+		if (controllerId) {
+			return new UpgradeComponent(controllerId)
+		}
+		return new UpgradeComponent()
 	}
 
 	export(): UpgradeComponentData {
 		return {
 			componentId: UpgradeComponent.id,
-			controllerId: this.controller?.id,
+			controllerId: this.controller?.id || null,
 		}
 	}
 }

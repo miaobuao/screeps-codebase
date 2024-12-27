@@ -1,6 +1,8 @@
 import BaseComponent from '../components/base'
 
-export default class BaseEntity<TComponent extends BaseComponent> {
+export default class BaseEntity<
+	TComponent extends BaseComponent = BaseComponent,
+> {
 	constructor(
 		public creepName: string,
 		public components: TComponent[] = [],

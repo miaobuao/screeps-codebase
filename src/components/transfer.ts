@@ -2,30 +2,40 @@ import BaseComponent, { type BaseComponentData } from './base'
 
 export interface TransferComponentData extends BaseComponentData {
 	componentId: typeof TransferComponent.id
-	structureId?: Id<StructureSpawn | StructureExtension>
+	structureId: Id<StructureSpawn | StructureExtension> | null
 }
 
 export default class TransferComponent extends BaseComponent {
 	static id = 'transfer' as const
 
 	constructor(
-		public structure: StructureSpawn | StructureExtension | null = null,
+		public structureId: Id<StructureSpawn | StructureExtension> | null = null,
 	) {
 		super()
 	}
 
-	static import(data?: TransferComponentData): TransferComponent {
-		if (!data?.structureId) {
-			return new TransferComponent()
+	get structure() {
+		if (this.structureId) {
+			return Game.getObjectById(this.structureId)
 		}
-		const obj = Game.getObjectById(data.structureId)
-		return new TransferComponent(obj)
+		return null
+	}
+
+	set structure(structure) {
+		this.structureId = structure?.id || null
+	}
+
+	static import({ structureId }: TransferComponentData): TransferComponent {
+		if (structureId) {
+			return new TransferComponent(structureId)
+		}
+		return new TransferComponent()
 	}
 
 	export(): TransferComponentData {
 		return {
 			componentId: TransferComponent.id,
-			structureId: this.structure?.id,
+			structureId: this.structureId,
 		}
 	}
 }

@@ -7,16 +7,26 @@ export interface WithdrawRuinComponentData extends BaseComponentData {
 export default class WithdrawRuinComponent extends BaseComponent {
 	static id = 'withdraw-ruin' as const
 
-	constructor(public ruin: Ruin | null = null) {
+	constructor(public ruinId: Id<Ruin> | null = null) {
 		super()
 	}
 
-	static import(data?: WithdrawRuinComponentData) {
-		if (!data?.ruinId) {
-			return new WithdrawRuinComponent()
+	get ruin() {
+		if (this.ruinId) {
+			return Game.getObjectById(this.ruinId)
 		}
-		const obj = Game.getObjectById(data.ruinId)
-		return new WithdrawRuinComponent(obj)
+		return null
+	}
+
+	set ruin(ruin) {
+		this.ruinId = ruin?.id || null
+	}
+
+	static import({ ruinId }: WithdrawRuinComponentData) {
+		if (ruinId) {
+			return new WithdrawRuinComponent(ruinId)
+		}
+		return new WithdrawRuinComponent()
 	}
 
 	export(): WithdrawRuinComponentData {

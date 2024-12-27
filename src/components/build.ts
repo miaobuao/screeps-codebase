@@ -2,28 +2,38 @@ import BaseComponent, { type BaseComponentData } from './base'
 
 export interface BuildComponentData extends BaseComponentData {
 	componentId: typeof BuildComponent.id
-	constructionSiteId?: Id<ConstructionSite>
+	constructionSiteId: Id<ConstructionSite> | null
 }
 
 export default class BuildComponent extends BaseComponent {
 	static id = 'build' as const
 
-	constructor(public constructionSite: ConstructionSite | null = null) {
+	constructor(public constructionSiteId: Id<ConstructionSite> | null = null) {
 		super()
 	}
 
-	static import(data?: BuildComponentData) {
-		if (!data?.constructionSiteId) {
+	get constructionSite() {
+		if (this.constructionSiteId) {
+			return Game.getObjectById(this.constructionSiteId)
+		}
+		return null
+	}
+
+	set constructionSite(site) {
+		this.constructionSiteId = site?.id || null
+	}
+
+	static import({ constructionSiteId }: BuildComponentData) {
+		if (!constructionSiteId) {
 			return new BuildComponent()
 		}
-		const obj = Game.getObjectById(data.constructionSiteId)
-		return new BuildComponent(obj)
+		return new BuildComponent(constructionSiteId)
 	}
 
 	export(): BuildComponentData {
 		return {
 			componentId: BuildComponent.id,
-			constructionSiteId: this.constructionSite?.id,
+			constructionSiteId: this.constructionSiteId,
 		}
 	}
 }

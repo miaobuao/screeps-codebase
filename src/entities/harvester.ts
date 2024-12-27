@@ -19,9 +19,9 @@ export class HarvesterEntity extends BaseEntity<
 		},
 	) {
 		super(creepName, [
-			new HarvestComponent(source),
-			new TransferComponent(transferStructure),
-			new WithdrawRuinComponent(ruin),
+			new HarvestComponent(source?.id),
+			new TransferComponent(transferStructure?.id),
+			new WithdrawRuinComponent(ruin?.id),
 		])
 	}
 }

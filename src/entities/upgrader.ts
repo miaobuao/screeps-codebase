@@ -13,8 +13,8 @@ export default class UpgraderEntity extends BaseEntity<
 		}: { controller?: StructureController; source?: Source },
 	) {
 		super(creepName, [
-			new HarvestComponent(source),
-			new UpgradeComponent(controller),
+			new HarvestComponent(source?.id),
+			new UpgradeComponent(controller?.id),
 		])
 	}
 }

@@ -8,22 +8,32 @@ export interface HarvestComponentData extends BaseComponentData {
 export default class HarvestComponent extends BaseComponent {
 	static id = 'harvest' as const
 
-	constructor(public source: Source | null = null) {
+	constructor(public sourceId: Id<Source> | null = null) {
 		super()
+	}
+
+	get source() {
+		if (this.sourceId) {
+			return Game.getObjectById(this.sourceId)
+		}
+		return null
+	}
+
+	set source(source) {
+		this.sourceId = source?.id || null
 	}
 
 	static import(data?: HarvestComponentData): HarvestComponent {
 		if (!data?.sourceId) {
 			return new HarvestComponent()
 		}
-		const obj = Game.getObjectById(data.sourceId)
-		return new HarvestComponent(obj)
+		return new HarvestComponent(data.sourceId)
 	}
 
 	export(): HarvestComponentData {
 		return {
 			componentId: HarvestComponent.id,
-			sourceId: this.source?.id,
+			sourceId: this.sourceId || undefined,
 		}
 	}
 }

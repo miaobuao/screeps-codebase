@@ -13,8 +13,8 @@ export default class BuilderEntity extends BaseEntity<
 		}: { constructionSite?: ConstructionSite; source?: Source },
 	) {
 		super(creepName, [
-			new HarvestComponent(source),
-			new BuildComponent(constructionSite),
+			new HarvestComponent(source?.id),
+			new BuildComponent(constructionSite?.id),
 		])
 	}
 }

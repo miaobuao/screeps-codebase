@@ -3,8 +3,8 @@ export interface BaseComponentData {
 }
 
 export default abstract class BaseComponent {
-	static import(data?: any): BaseComponent {
+	static import(data?: BaseComponentData): BaseComponent {
 		throw new Error('Not implemented')
 	}
-	abstract export(): any
+	abstract export(): BaseComponentData
 }
