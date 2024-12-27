@@ -38,32 +38,10 @@ export default class Sp1System extends BaseSystem {
 		for (const name in Game.creeps) {
 			if (entitiesData[name]) {
 				const entity = this.parseEntityData(entitiesData[name])
-				console.log(
-					'parse from memory, component length',
-					entity.components.length,
-				)
-
 				this.entities.push(entity)
-			} else {
-				if (name.startsWith('harvester')) {
-					const entity = new HarvesterEntity(name, {})
-					this.registerEntity(entity)
-				} else if (name.startsWith('upgrader')) {
-					const entity = new UpgraderEntity(name, {})
-					this.registerEntity(entity)
-				} else if (name.startsWith('builder')) {
-					const entity = new BuilderEntity(name, {})
-					this.registerEntity(entity)
-				}
+			} else if (Game.creeps[name].room === this.spawn.room) {
+				this.createAndRegisterEntity(name)
 			}
-		}
-	}
-
-	registerEntity(entity: BaseEntity<any>): void {
-		this.entities.push(entity)
-		entitiesData[entity.creep.name] = {
-			name: entity.creep.name,
-			components: entity.components,
 		}
 	}
 
@@ -71,16 +49,13 @@ export default class Sp1System extends BaseSystem {
 		const harvesters = filter(
 			this.getEntities([HarvestComponent]),
 			(entity) => {
-				if (
-					entity.creep.memory.behavior !== BehaviorType.harvest &&
-					entity.creep.store.energy > 0
-				) {
+				const { creep } = entity
+				const { behavior } = creep.memory
+				const { energy } = creep.store
+				if (behavior !== BehaviorType.harvest && energy > 0) {
 					return false
 				}
-				if (entity.creep.store.getFreeCapacity() === 0) {
-					return false
-				}
-				return true
+				return creep.store.getFreeCapacity() !== 0
 			},
 		)
 		this.runHarvestComponent(harvesters)
@@ -112,6 +87,34 @@ export default class Sp1System extends BaseSystem {
 		this.exportAllEntities().map((entity) => {
 			entitiesData[entity.name] = entity
 		})
+	}
+
+	createAndRegisterEntity(name: string) {
+		let entity: BaseEntity<any> | null = null
+
+		if (name.startsWith('harvester')) {
+			entity = new HarvesterEntity(name, {})
+		} else if (name.startsWith('upgrader')) {
+			entity = new UpgraderEntity(name, {})
+		} else if (name.startsWith('builder')) {
+			entity = new BuilderEntity(name, {})
+		}
+
+		if (entity) {
+			this.registerEntity(entity)
+		}
+	}
+
+	registerEntity(entity: BaseEntity<any>): void {
+		this.entities.push(entity)
+		entitiesData[entity.creep.name] = {
+			name: entity.creep.name,
+			components: entity.components,
+		}
+	}
+
+	get hasSite() {
+		return this.spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0
 	}
 
 	get totalEnergy() {
@@ -183,10 +186,6 @@ export default class Sp1System extends BaseSystem {
 			++idx
 		}
 		return `${name}-${idx}`
-	}
-
-	get hasSite() {
-		return this.spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0
 	}
 
 	runHarvestComponent(entities: BaseEntity<HarvestComponent>[]) {
