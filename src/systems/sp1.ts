@@ -1,4 +1,4 @@
-import { filter, map, reduce } from 'lodash-es'
+import { map } from 'lodash-es'
 import BuildComponent from '../components/build'
 import HarvestComponent from '../components/harvest'
 import TransferComponent from '../components/transfer'
@@ -43,46 +43,42 @@ export default class Sp1System extends BaseSystem {
 				this.createAndRegisterEntity(name)
 			}
 		}
+		console.log('=================')
 	}
 
 	run() {
-		const harvesters = filter(
-			this.getEntities([HarvestComponent]),
-			(entity) => {
-				const { creep } = entity
-				const { behavior } = creep.memory
-				const { energy } = creep.store
-				if (behavior !== BehaviorType.harvest && energy > 0) {
-					return false
-				}
-				return creep.store.getFreeCapacity() !== 0
-			},
-		)
+		const harvesters = this.getEntities([HarvestComponent]).filter((entity) => {
+			const { creep } = entity
+			const { behavior } = creep.memory
+			const { energy } = creep.store
+			if (behavior !== BehaviorType.harvest && energy > 0) {
+				return false
+			}
+			return creep.store.getFreeCapacity() !== 0
+		})
 		this.runHarvestComponent(harvesters)
-		const transfers = filter(
-			this.getEntities([TransferComponent]),
+		const transfers = this.getEntities([TransferComponent]).filter(
 			(entity) => !harvesters.includes(entity as any),
 		)
 		this.runTransferComponent(transfers)
-		const builders = filter(
-			this.getEntities([BuildComponent]),
+		const builders = this.getEntities([BuildComponent]).filter(
 			(entity) => !harvesters.includes(entity as any),
 		)
 		this.runBuildComponent(builders)
-		const upgraders = filter(
-			this.getEntities([UpgradeComponent]),
+		const upgraders = this.getEntities([UpgradeComponent]).filter(
 			(entity) => !harvesters.includes(entity as any),
 		)
 		this.runUpgradeComponent(upgraders)
 
-		console.log('=================')
 		console.log('entities', this.entities.length)
 		console.log('harvesters', harvesters.length)
 		console.log('transfers', transfers.length)
 		console.log('builders', builders.length)
 		console.log('upgraders', upgraders.length)
 
-		this.spawnCreep()
+		if (!this.spawn.spawning) {
+			this.spawnCreep()
+		}
 
 		this.exportAllEntities().map((entity) => {
 			entitiesData[entity.name] = entity
@@ -125,8 +121,7 @@ export default class Sp1System extends BaseSystem {
 				structure.structureType == STRUCTURE_EXTENSION ||
 				structure.structureType === STRUCTURE_SPAWN,
 		})
-		return reduce(
-			structures,
+		return structures.reduce(
 			(total, structure) => total + structure.store.energy,
 			0,
 		)
@@ -134,11 +129,14 @@ export default class Sp1System extends BaseSystem {
 
 	spawnCreep() {
 		const totalEnergy = this.totalEnergy
+		const harvesters = this.getEntities([TransferComponent])
 		console.log('totalEnergy', totalEnergy)
+		console.log('HarvesterEntity', harvesters.length)
+
 		if (totalEnergy < 300) {
 			return
 		}
-		const harvesters = this.getEntities([HarvestComponent])
+
 		const harvesterCount = harvesters.length
 		if (totalEnergy < 400) {
 			var body = [WORK, CARRY, MOVE]
@@ -161,17 +159,17 @@ export default class Sp1System extends BaseSystem {
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (harvesterCount < 2) {
+		} else if (harvesterCount < 3) {
 			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.getEntities([UpgradeComponent]).length < 10) {
+		} else if (this.getEntities([UpgradeComponent]).length < 6) {
 			const name = this.getNewCreepName('upgrader')
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.hasSite && this.getEntities([BuildComponent]).length < 1) {
+		} else if (this.hasSite && this.getEntities([BuildComponent]).length < 2) {
 			const name = this.getNewCreepName('builder')
 			this.spawn.spawnCreep(body, name)
 			const entity = new BuilderEntity(name, {})
