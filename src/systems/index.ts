@@ -7,6 +7,7 @@ import type BaseEntity from '../entities/base'
 import BuilderEntity from '../entities/builder'
 import { HarvesterEntity } from '../entities/harvester'
 import UpgraderEntity from '../entities/upgrader'
+import statsScanner from '../utils/stats-scanner'
 import BaseSystem, { BehaviorType, type EntityData } from './base'
 
 declare global {
@@ -17,7 +18,7 @@ declare global {
 
 const entitiesData: Record<string, EntityData> = {}
 
-export default class Sp1System extends BaseSystem {
+export default class System extends BaseSystem {
 	constructor(private spawn: StructureSpawn) {
 		super()
 		const spawningName = map(
@@ -43,7 +44,6 @@ export default class Sp1System extends BaseSystem {
 				this.createAndRegisterEntity(name)
 			}
 		}
-		console.log('=================')
 	}
 
 	run() {
@@ -70,12 +70,6 @@ export default class Sp1System extends BaseSystem {
 		)
 		this.runUpgradeComponent(upgraders)
 
-		console.log('entities', this.entities.length)
-		console.log('harvesters', harvesters.length)
-		console.log('transfers', transfers.length)
-		console.log('builders', builders.length)
-		console.log('upgraders', upgraders.length)
-
 		if (!this.spawn.spawning) {
 			this.spawnCreep()
 		}
@@ -83,6 +77,37 @@ export default class Sp1System extends BaseSystem {
 		this.exportAllEntities().map((entity) => {
 			entitiesData[entity.name] = entity
 		})
+
+		if (Game.time % 20 === 0) {
+			statsScanner()
+			if (!Memory.stats) {
+				Memory.stats = {}
+			}
+			if (!Memory.stats.resource) {
+				Memory.stats.resource = {}
+			}
+			if (!Memory.stats.entity) {
+				Memory.stats.entity = {}
+			}
+			const [harvests, upgrades, transfers, builds] = [
+				HarvestComponent,
+				UpgradeComponent,
+				TransferComponent,
+				BuildComponent,
+			].map((c) => this.getEntities([c]))
+			Memory.stats.resource = {
+				energy: this.totalEnergy,
+			}
+			Memory.stats.entity = {
+				entityCount: this.entities.length,
+				components: {
+					harvest: { count: harvests.length },
+					upgrade: { count: upgrades.length },
+					transfer: { count: transfers.length },
+					build: { count: builds.length },
+				},
+			}
+		}
 	}
 
 	createAndRegisterEntity(name: string) {
@@ -130,8 +155,6 @@ export default class Sp1System extends BaseSystem {
 	spawnCreep() {
 		const totalEnergy = this.totalEnergy
 		const harvesters = this.getEntities([TransferComponent])
-		console.log('totalEnergy', totalEnergy)
-		console.log('HarvesterEntity', harvesters.length)
 
 		if (totalEnergy < 300) {
 			return
@@ -164,7 +187,7 @@ export default class Sp1System extends BaseSystem {
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.getEntities([UpgradeComponent]).length < 6) {
+		} else if (this.getEntities([UpgradeComponent]).length < 10) {
 			const name = this.getNewCreepName('upgrader')
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
