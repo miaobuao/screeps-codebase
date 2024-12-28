@@ -1,0 +1,26 @@
+{
+	"name": "spawns",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"dev": "run-s dev:bundle dev:transpile",
+		"dev:bundle": "bun build ./src/index.ts --format=cjs --target=node --outfile=dist/index.js",
+		"dev:transpile": "swc ./dist/index.js -o ./dist/index.js",
+		"build": "run-s build:bundle build:transpile",
+		"build:bundle": "bun build ./src/index.ts --minify --format=cjs --target=node --outfile=dist/index.js",
+		"build:transpile": "swc ./dist/index.js -o ./dist/index.js --config-file ./swcrc.build.json"
+	},
+	"devDependencies": {
+		"@swc/cli": "^0.5.2",
+		"@swc/core": "^1.10.2",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@types/lodash-es": "^4.17.12",
+		"@types/screeps": "^3.3.8",
+		"lodash-es": "^4.17.21"
+	}
+}
