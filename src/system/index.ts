@@ -23,8 +23,12 @@ export default class System {
 	public entities: BaseEntity<any>[] = []
 	public componentMap: Map<typeof BaseComponent, Set<BaseEntity>> = new Map()
 
-	constructor(private spawn: StructureSpawn) {
+	constructor(public spawnName: string) {
 		this.initializeEntities()
+	}
+
+	get spawn() {
+		return Game.spawns[this.spawnName]
 	}
 
 	clearState() {
@@ -87,36 +91,36 @@ export default class System {
 		if (!this.spawn.spawning) {
 			this.spawnCreep()
 		}
+	}
 
-		if (Game.time % 20 === 0) {
-			statsScanner()
-			if (!Memory.stats) {
-				Memory.stats = {}
-			}
-			if (!Memory.stats.resource) {
-				Memory.stats.resource = {}
-			}
-			if (!Memory.stats.entity) {
-				Memory.stats.entity = {}
-			}
-			const [harvests, upgrades, transfers, builds] = [
-				HarvestComponent,
-				UpgradeComponent,
-				TransferComponent,
-				BuildComponent,
-			].map((c) => this.getEntities([c]))
-			Memory.stats.resource = {
-				energy: this.totalEnergy,
-			}
-			Memory.stats.entity = {
-				entityCount: this.entities.length,
-				components: {
-					harvest: { count: harvests.length },
-					upgrade: { count: upgrades.length },
-					transfer: { count: transfers.length },
-					build: { count: builds.length },
-				},
-			}
+	stats() {
+		statsScanner()
+		if (!Memory.stats) {
+			Memory.stats = {}
+		}
+		if (!Memory.stats.resource) {
+			Memory.stats.resource = {}
+		}
+		if (!Memory.stats.entity) {
+			Memory.stats.entity = {}
+		}
+		const [harvests, upgrades, transfers, builds] = [
+			HarvestComponent,
+			UpgradeComponent,
+			TransferComponent,
+			BuildComponent,
+		].map((c) => this.getEntities([c]))
+		Memory.stats.resource = {
+			energy: this.totalEnergy,
+		}
+		Memory.stats.entity = {
+			entityCount: this.entities.length,
+			components: {
+				harvest: { count: harvests.length },
+				upgrade: { count: upgrades.length },
+				transfer: { count: transfers.length },
+				build: { count: builds.length },
+			},
 		}
 	}
 
@@ -176,7 +180,7 @@ export default class System {
 
 	registerEntity(entity: BaseEntity): void {
 		this.entities.push(entity)
-		entitiesData[entity.creep.name] = entity
+		entitiesData[entity.creepName] = entity
 		for (const component of entity.components) {
 			const key = component.constructor as typeof BaseComponent
 			const set = this.componentMap.get(key) || new Set()
@@ -228,12 +232,8 @@ export default class System {
 			body = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
 		}
 		const hasHarvester = harvesterCount > 0
-		if (!hasHarvester) {
-			const name = this.getNewCreepName('harvester')
-			this.spawn.spawnCreep(body, name)
-			const entity = new HarvesterEntity(name, {})
-			this.registerEntity(entity)
-		} else if (harvesterCount < 4) {
+		const bigHarvesters = harvesters.filter((h) => h.creep.body.length > 4)
+		if (bigHarvesters.length < 2 && harvesterCount < 4) {
 			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})

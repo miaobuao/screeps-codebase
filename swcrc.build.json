@@ -8,6 +8,6 @@
 				"comments": false
 			}
 		},
-		"target": "es3"
+		"target": "es2015"
 	}
 }
