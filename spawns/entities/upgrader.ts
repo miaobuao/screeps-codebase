@@ -1,5 +1,5 @@
-import HarvestComponent from '../components/harvest'
-import UpgradeComponent from '../components/upgrade'
+import HarvestComponent from '@/components/harvest'
+import UpgradeComponent from '@/components/upgrade'
 import BaseEntity from './base'
 
 export default class UpgraderEntity extends BaseEntity<

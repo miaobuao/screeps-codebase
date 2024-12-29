@@ -1,4 +1,4 @@
-import BaseComponent from '../components/base'
+import BaseComponent from '@/components/base'
 
 export default class BaseEntity<
 	TComponent extends BaseComponent = BaseComponent,

@@ -1,9 +1,9 @@
-import HarvestComponent from '../components/harvest'
-import TransferComponent from '../components/transfer'
-import WithdrawRuinComponent from '../components/withdraw-ruin'
+import HarvestComponent from '@/components/harvest'
+import TransferComponent from '@/components/transfer'
+import WithdrawRuinComponent from '@/components/withdraw-ruin'
 import BaseEntity from './base'
 
-export class HarvesterEntity extends BaseEntity<
+export default class HarvesterEntity extends BaseEntity<
 	HarvestComponent | TransferComponent | WithdrawRuinComponent
 > {
 	constructor(

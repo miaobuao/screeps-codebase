@@ -1,16 +1,11 @@
 import System from './system'
 
-const sys = new System('sp1')
+const sys = new System()
 
 export function loop() {
 	if (Game.cpu.bucket >= 5000) {
 		Game.cpu.generatePixel()
 	}
-	sys.clearState()
-	sys.initializeEntities()
+	sys.setupSpawnSystem()
 	sys.run()
-
-	if (Game.time % 20 === 0) {
-		sys.stats()
-	}
 }
