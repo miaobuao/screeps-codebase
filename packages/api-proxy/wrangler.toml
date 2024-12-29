@@ -1,0 +1,10 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "screeps-api-proxy"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-12-30"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "screeps-api-proxy"
+database_id = "1d05c28b-3002-41bf-9d96-456c9f2bd8fd"
+migrations_dir = "drizzle"

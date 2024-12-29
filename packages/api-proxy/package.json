@@ -1,0 +1,28 @@
+{
+	"name": "api-proxy",
+	"private": true,
+	"scripts": {
+		"build": "nitro build",
+		"dev": "nitro dev",
+		"prepare": "nitro prepare",
+		"preview": "node .output/server/index.mjs",
+		"db:apply:local": "wrangler d1 migrations apply screeps-api-proxy --local",
+		"db:apply:remote": "wrangler d1 migrations apply screeps-api-proxy --remote"
+	},
+	"devDependencies": {
+		"@types/gzip-js": "^0.3.5",
+		"@types/lodash-es": "^4.17.12",
+		"dayjs": "^1.11.13",
+		"drizzle-kit": "^0.30.1",
+		"gzip-js": "^0.3.2",
+		"lodash-es": "^4.17.21",
+		"nitro-cloudflare-dev": "^0.2.1",
+		"nitropack": "latest",
+		"prompts": "^2.4.2",
+		"unenv": "^1.10.0",
+		"unstorage": "latest"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.38.3"
+	}
+}

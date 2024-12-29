@@ -11,6 +11,7 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"cSpell.words": [
+		"screeps",
 		"upgrader",
 		"upgraders"
 	]

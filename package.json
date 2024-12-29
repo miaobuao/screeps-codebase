@@ -8,7 +8,8 @@
 	"devDependencies": {
 		"@types/bun": "latest",
 		"npm-run-all2": "^7.0.2",
-		"prettier": "^3.4.2"
+		"prettier": "^3.4.2",
+		"wrangler": "^3.99.0"
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
