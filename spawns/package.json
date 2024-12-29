@@ -3,12 +3,11 @@
 	"module": "index.ts",
 	"type": "module",
 	"scripts": {
-		"dev": "run-s dev:bundle dev:transpile",
-		"dev:bundle": "bun build ./src/index.ts --format=cjs --target=node --outfile=dist/index.js",
-		"dev:transpile": "swc ./dist/index.js -o ./dist/index.js",
-		"build": "run-s build:bundle build:transpile",
-		"build:bundle": "bun build ./src/index.ts --minify --format=cjs --target=node --outfile=dist/index.js",
-		"build:transpile": "swc ./dist/index.js -o ./dist/index.js --config-file ./swcrc.build.json"
+		"dev": "run-s dev:bundle transpile",
+		"build": "run-s build:bundle transpile",
+		"dev:bundle": "bun build ./index.ts --format=cjs --target=node --outfile=dist/index.js",
+		"build:bundle": "bun build ./index.ts --minify --format=cjs --target=node --outfile=dist/index.js",
+		"transpile": "swc ./dist/index.js -o ./dist/index.js --config-file ./swcrc.build.json"
 	},
 	"devDependencies": {
 		"@swc/cli": "^0.5.2",

@@ -231,14 +231,24 @@ export default class System {
 		} else {
 			body = [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
 		}
-		const hasHarvester = harvesterCount > 0
-		const bigHarvesters = harvesters.filter((h) => h.creep.body.length > 4)
-		if (bigHarvesters.length < 2 && harvesterCount < 4) {
+		// 至少1只采集者
+		if (harvesterCount < 1) {
 			const name = this.getNewCreepName('harvester')
 			this.spawn.spawnCreep(body, name)
 			const entity = new HarvesterEntity(name, {})
 			this.registerEntity(entity)
-		} else if (this.getEntities([UpgradeComponent]).length < 20) {
+			return
+		}
+		// 优先生产大爬虫
+		if (totalEnergy < 500) {
+			return
+		}
+		if (harvesterCount < 2) {
+			const name = this.getNewCreepName('harvester')
+			this.spawn.spawnCreep(body, name)
+			const entity = new HarvesterEntity(name, {})
+			this.registerEntity(entity)
+		} else if (this.getEntities([UpgradeComponent]).length < 3) {
 			const name = this.getNewCreepName('upgrader')
 			this.spawn.spawnCreep(body, name)
 			const entity = new UpgraderEntity(name, {})
@@ -316,12 +326,21 @@ export default class System {
 			const buildComponent = entity.getComponent(BuildComponent)!
 			let constructionSite = buildComponent.constructionSite
 			if (!constructionSite) {
-				constructionSite = entity.creep.pos.findClosestByPath(
+				constructionSite = entity.creep.pos.findClosestByRange(
 					FIND_CONSTRUCTION_SITES,
 				)
 				buildComponent.constructionSite = constructionSite
 			}
-			if (
+			if (!constructionSite) {
+				entity.creep.moveTo(this.spawn)
+				return
+			}
+			const distance = entity.creep.pos.getRangeTo(constructionSite)
+			if (distance > 1) {
+				entity.creep.moveTo(constructionSite, {
+					visualizePathStyle: { stroke: '#ffffff' },
+				})
+			} else if (
 				constructionSite &&
 				entity.creep.build(constructionSite) == ERR_NOT_IN_RANGE
 			) {
