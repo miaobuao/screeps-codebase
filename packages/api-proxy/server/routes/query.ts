@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { and, eq, gte, lte } from 'drizzle-orm'
-import { map } from 'lodash-es'
+import { isNumber, map } from 'lodash-es'
 import { memoryTable } from '~/db/schema'
 
 export default defineEventHandler(async (event) => {
@@ -11,8 +11,12 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const _token = token.toString()
-	const _startTime = startTime ? dayjs(startTime.toString()) : dayjs(0)
-	const _endTime = endTime ? dayjs(endTime.toString()) : dayjs()
+	const _startTime = startTime
+		? dayjs(isNumber(startTime) ? Number(startTime) : startTime.toString())
+		: dayjs(0)
+	const _endTime = endTime
+		? dayjs(isNumber(endTime) ? Number(endTime) : endTime.toString())
+		: dayjs()
 	const _limit = limit ? parseInt(limit.toString()) : undefined
 
 	return map(
