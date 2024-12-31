@@ -4,7 +4,7 @@ import { map } from 'lodash-es'
 import { memoryTable } from '~/db/schema'
 
 export default defineEventHandler(async (event) => {
-	const { token, shard, startTime, endTime, limit } = getQuery(event)
+	const { token, shard, startTime, endTime, limit, path } = getQuery(event)
 
 	if (!token) {
 		return new Response('token required', { status: 400 })
@@ -19,6 +19,8 @@ export default defineEventHandler(async (event) => {
 		await event.context.db.query.memoryTable.findMany({
 			where: and(
 				eq(memoryTable.token, _token),
+				shard && eq(memoryTable.shard, shard.toString()),
+				path && eq(memoryTable.path, path.toString()),
 				gte(memoryTable.datetime, _startTime.toDate().getTime()),
 				lte(memoryTable.datetime, _endTime.toDate().getTime()),
 			),
@@ -28,7 +30,7 @@ export default defineEventHandler(async (event) => {
 			return {
 				...d,
 				data: JSON.parse(d.data),
-				datetime: dayjs(d.datetime).toDate().toString(),
+				datetime: dayjs(d.datetime).format('YYYY-MM-DD HH:mm:ss'),
 				timestamp: d.datetime,
 			}
 		},
